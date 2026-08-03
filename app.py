@@ -56,14 +56,14 @@ if st.button("🚀 Bắt đầu tạo Video", type="primary"):
                 if HAS_NEW_SDK:
                     client = genai.Client(api_key=api_key_input)
                     response = client.models.generate_content(
-                        model='gemini-2.5-pro',
+                        model='gemini-2.5-flash',
                         contents=[system_prompt, f"Ý tưởng: {idea}"],
                         config=types.GenerateContentConfig(response_mime_type="application/json")
                     )
                     result_text = response.text
                 else:
                     genai.configure(api_key=api_key_input)
-                    model = genai.GenerativeModel('gemini-1.5-pro', system_instruction=system_prompt, generation_config={"response_mime_type": "application/json"})
+                    model = genai.GenerativeModel('gemini-1.5-flash', system_instruction=system_prompt, generation_config={"response_mime_type": "application/json"})
                     response = model.generate_content(f"Ý tưởng: {idea}")
                     result_text = response.text
                     
