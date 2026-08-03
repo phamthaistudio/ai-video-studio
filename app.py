@@ -86,8 +86,9 @@ if st.button("🚀 Bắt đầu tạo Video", type="primary"):
                 
                 if HAS_NEW_SDK:
                     client = genai.Client(api_key=api_key_input)
+                    # Thử sử dụng mô hình tạo ảnh chuẩn của Google (Imagen 3)
                     response = client.models.generate_content(
-                        model='gemini-3.1-flash', 
+                        model='imagen-3.0-generate-001', 
                         contents=image_prompt,
                         config=types.GenerateContentConfig(response_modalities=["IMAGE"])
                     )
@@ -95,7 +96,7 @@ if st.button("🚀 Bắt đầu tạo Video", type="primary"):
                     if hasattr(part, 'inline_data') and part.inline_data:
                         with open(image_path, "wb") as f:
                             f.write(part.inline_data.data)
-                        st.image(image_path, caption="Ảnh tham chiếu do NanoBanana 2 tạo")
+                        st.image(image_path, caption="Ảnh tham chiếu do AI tạo")
                         status.update(label="✅ Vẽ ảnh xong!", state="complete", expanded=False)
                     else:
                         raise Exception("Không nhận được dữ liệu ảnh.")
@@ -103,7 +104,10 @@ if st.button("🚀 Bắt đầu tạo Video", type="primary"):
                     status.update(label="⚠️ API cũ không hỗ trợ tạo ảnh trực tiếp ở đây, bỏ qua bước tạo ảnh.", state="complete")
                     
             except Exception as e:
-                st.warning(f"Lỗi khi vẽ ảnh: {e}. Hệ thống sẽ tiếp tục tạo video chỉ với văn bản.")
+                if "404" in str(e) or "NOT_FOUND" in str(e):
+                    st.warning("⚠️ Tài khoản của bạn chưa được Google cấp quyền dùng model vẽ ảnh này (hoặc cần nạp tiền). Bỏ qua bước tạo ảnh.")
+                else:
+                    st.warning(f"Lỗi khi vẽ ảnh: {e}. Hệ thống sẽ tiếp tục tạo video.")
                 status.update(label="⚠️ Vẽ ảnh thất bại (Bỏ qua)", state="error")
 
         # 3. Tạo Video bằng Google Flow / Veo 3.1
@@ -147,7 +151,10 @@ if st.button("🚀 Bắt đầu tạo Video", type="primary"):
                     status.update(label="❌ Lỗi Video", state="error")
                     
             except Exception as e:
-                st.error(f"Lỗi khi tạo video: {e}")
+                if "404" in str(e) or "NOT_FOUND" in str(e):
+                    st.error("⚠️ Tài khoản Google AI Studio của bạn chưa được cấp quyền dùng Veo 3.1 (Google Flow). Tính năng này thường yêu cầu tài khoản được duyệt riêng hoặc phải thêm thẻ thanh toán (Billing).")
+                else:
+                    st.error(f"Lỗi khi tạo video: {e}")
                 status.update(label="❌ Render Video thất bại", state="error")
 
         st.balloons()
